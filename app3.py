@@ -45,6 +45,134 @@ with st.sidebar:
         st.info("Please upload one of these files:")
         for file in model_files_to_check:
             st.code(file)
+    
+    st.divider()
+    
+    # Student Information Section
+    st.header("📚 Project Information")
+    
+    # Using st.info for a nice colored box
+    st.info("""
+    **Student ID:** PIUS20230024 
+    **Student Name:** May Mon Thant 
+    **Course:** Introduction to Machine Learning  
+    **University:** Parami University  
+    **Instructor:** Prof. Nwe Nwe Htay Win
+    """)
+    
+    st.divider()
+    
+    # Derived Features Section - Made interactive
+    st.header("📊 Derived Features Settings")
+    
+    # These features can be manually overridden
+    st.markdown("**Adjust derived features manually (optional):**")
+    
+    # Rush Hour - Dropdown
+    rush_hour_options = ["Normal", "Morning Rush (6-8 AM)", "Evening Rush (5-7 PM)"]
+    rush_hour_selection = st.selectbox(
+        "Rush Hour",
+        options=rush_hour_options,
+        index=0,  # Default to Normal
+        help="Manually set rush hour status"
+    )
+    
+    # Weekend - Yes/No
+    weekend_override = st.radio(
+        "Weekend",
+        options=["No", "Yes"],
+        index=0,  # Default to No
+        horizontal=True
+    )
+    
+    # Season - Dropdown
+    season_options = ["Winter", "Spring", "Summer", "Fall", "Holiday Season (Nov-Dec)"]
+    season_selection = st.selectbox(
+        "Season",
+        options=season_options,
+        index=2,  # Default to Summer
+        help="Manually set the season"
+    )
+    
+    # Night Flight - Yes/No
+    night_flight_override = st.radio(
+        "Night Flight (10 PM - 5 AM)",
+        options=["No", "Yes"],
+        index=0,  # Default to No
+        horizontal=True
+    )
+    
+    # Flight Length - Dropdown
+    flight_length_options = ["Short (<500 miles)", "Medium (500-2000 miles)", "Long (>2000 miles)"]
+    flight_length_selection = st.selectbox(
+        "Flight Length",
+        options=flight_length_options,
+        index=1,  # Default to Medium
+        help="Manually set flight length category"
+    )
+    
+    # Distance - Slider
+    distance_override = st.slider(
+        "Distance (miles)",
+        min_value=50,
+        max_value=3000,
+        value=500,
+        step=50,
+        help="Manually set the flight distance"
+    )
+    
+    # Info about derived features
+    with st.expander("ℹ️ About Derived Features"):
+        st.markdown("""
+        **Derived features** are calculated from your input data to capture patterns:
+        
+        - **Rush Hour**: Busier times with higher traffic
+        - **Weekend**: Different operational patterns
+        - **Season**: Weather and travel patterns vary by season
+        - **Night Flight**: Reduced operations, different crew schedules
+        - **Flight Length**: Short vs long haul operations
+        
+        *By default, these are auto-calculated from your inputs above.*
+        """)
+    
+    st.divider()
+    
+    # Display current derived features (calculated or overridden)
+    st.header("📈 Current Derived Features")
+    
+    # Calculate what will be used
+    current_rush_hour = rush_hour_selection
+    current_weekend = weekend_override
+    current_season = season_selection
+    current_night = night_flight_override
+    current_length = flight_length_selection.split(" ")[0]  # Get first word
+    current_distance = f"{distance_override} miles"
+    
+    # Display in a clean format
+    st.info(f"""
+    **Current Settings:**
+    - **Rush Hour**: {current_rush_hour}
+    - **Weekend**: {current_weekend}
+    - **Season**: {current_season}
+    - **Night Flight**: {current_night}
+    - **Flight Length**: {current_length}
+    - **Distance**: {current_distance}
+    """)
+    
+    # Reset button
+    if st.button("Reset to Auto-Calculated", use_container_width=True):
+        st.rerun()
+    
+    st.divider()
+    st.header("📦 Requirements")
+    st.code("""
+streamlit==1.28.0
+pandas==2.1.3
+numpy==1.24.3
+scikit-learn==1.3.2
+joblib==1.3.2
+imbalanced-learn==0.11.0  # Only if using flight_delay.pkl with SMOTE
+""")
 
 # Load model
 @st.cache_resource
@@ -168,44 +296,79 @@ with col5:
     distance = st.slider("Distance (miles)", 50, 3000, 500, 50, key="distance")
     scheduled_time = st.slider("Flight Time (minutes)", 30, 600, 120, 15, key="duration")
 
-# Calculate derived features
+# Calculate derived features based on user inputs OR overrides
 hour_of_day = scheduled_departure
-is_morning_rush = 1 if hour_of_day in [6, 7, 8] else 0
-is_evening_rush = 1 if hour_of_day in [17, 18, 19] else 0
-is_night_flight = 1 if hour_of_day in [22, 23, 0, 1, 2, 3, 4, 5] else 0
-is_weekend = 1 if day_of_week in [6, 7] else 0
-winter_month = 1 if month in [12, 1, 2] else 0
-summer_month = 1 if month in [6, 7, 8] else 0
-holiday_season = 1 if month in [11, 12] else 0
-is_short_flight = 1 if distance < 500 else 0
-is_long_flight = 1 if distance > 2000 else 0
+
+# Use sidebar overrides if they differ from auto-calculated
+is_morning_rush = 1 if rush_hour_selection == "Morning Rush (6-8 AM)" else 0
+is_evening_rush = 1 if rush_hour_selection == "Evening Rush (5-7 PM)" else 0
+if rush_hour_selection == "Normal":
+    # Auto-calculate if set to normal
+    is_morning_rush = 1 if hour_of_day in [6, 7, 8] else 0
+    is_evening_rush = 1 if hour_of_day in [17, 18, 19] else 0
+
+is_night_flight = 1 if night_flight_override == "Yes" else 0
+if night_flight_override == "No":
+    # Auto-calculate if set to No
+    is_night_flight = 1 if hour_of_day in [22, 23, 0, 1, 2, 3, 4, 5] else 0
+
+is_weekend = 1 if weekend_override == "Yes" else 0
+if weekend_override == "No":
+    # Auto-calculate if set to No
+    is_weekend = 1 if day_of_week in [6, 7] else 0
+
+# Season calculations
+winter_month = 1 if season_selection == "Winter" else 0
+summer_month = 1 if season_selection == "Summer" else 0
+holiday_season = 1 if season_selection == "Holiday Season (Nov-Dec)" else 0
+
+# If season is set to something else, auto-calculate
+if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
+    winter_month = 1 if month in [12, 1, 2] else 0
+    summer_month = 1 if month in [6, 7, 8] else 0
+    holiday_season = 1 if month in [11, 12] else 0
+
+# Flight length calculations
+is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
+is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
+if flight_length_selection == "Medium (500-2000 miles)":
+    # Auto-calculate
+    is_short_flight = 1 if distance < 500 else 0
+    is_long_flight = 1 if distance > 2000 else 0
+
+# Use distance from sidebar if it differs
+if distance_override != distance:
+    distance = distance_override
+    # Recalculate flight length based on new distance if not manually set
+    if flight_length_selection == "Medium (500-2000 miles)":
+        is_short_flight = 1 if distance < 500 else 0
+        is_long_flight = 1 if distance > 2000 else 0
 
 # Calculate scheduled arrival (HHMM format)
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
 
-# Show derived features
+# Show derived features in main area (for reference)
 st.divider()
-st.header("📊 Derived Features")
+st.header("📊 Calculated Derived Features")
 
 col6, col7, col8 = st.columns(3)
 
 with col6:
-    st.metric("Rush Hour", 
-              "Morning" if is_morning_rush else 
-              "Evening" if is_evening_rush else "Normal")
+    rush_hour_display = "Morning" if is_morning_rush else "Evening" if is_evening_rush else "Normal"
+    st.metric("Rush Hour", rush_hour_display)
     st.metric("Weekend", "Yes" if is_weekend else "No")
 
 with col7:
-    season = "Winter" if winter_month else \
-             "Summer" if summer_month else \
-             "Holiday" if holiday_season else "Regular"
-    st.metric("Season", season)
+    season_display = "Winter" if winter_month else \
+                    "Summer" if summer_month else \
+                    "Holiday" if holiday_season else "Regular"
+    st.metric("Season", season_display)
     st.metric("Night Flight", "Yes" if is_night_flight else "No")
 
 with col8:
-    flight_length = "Short" if is_short_flight else \
-                   "Long" if is_long_flight else "Medium"
-    st.metric("Flight Length", flight_length)
+    flight_length_display = "Short" if is_short_flight else \
+                           "Long" if is_long_flight else "Medium"
+    st.metric("Flight Length", flight_length_display)
     st.metric("Distance", f"{distance} miles")
 
 # Create input DataFrame (EXACTLY as your model expects)
@@ -295,6 +458,14 @@ else:
                 st.write(f"**Flight Time**: {scheduled_time} minutes")
                 st.write(f"**Distance**: {distance} miles")
                 
+                # Show derived features used
+                st.write("**Derived Features Used:**")
+                st.write(f"- Rush Hour: {rush_hour_display}")
+                st.write(f"- Weekend: {'Yes' if is_weekend else 'No'}")
+                st.write(f"- Season: {season_display}")
+                st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
+                st.write(f"- Flight Length: {flight_length_display}")
+                
                 # Show risk factors
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
@@ -371,17 +542,4 @@ st.divider()
 st.caption("""
 **Note**: Predictions are based on historical data. Actual delays may vary due to weather, 
 air traffic control, or operational factors. Always check with your airline for official flight status.
-""")
-
-# Requirements
-with st.sidebar:
-    st.divider()
-    st.header("📦 Requirements")
-    st.code("""
-streamlit==1.28.0
-pandas==2.1.3
-numpy==1.24.3
-scikit-learn==1.3.2
-joblib==1.3.2
-imbalanced-learn==0.11.0  # Only if using flight_delay.pkl with SMOTE
 """)
