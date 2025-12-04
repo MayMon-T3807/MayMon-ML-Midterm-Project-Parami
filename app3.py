@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import pickle
 import os
 from datetime import datetime
 
@@ -29,29 +30,53 @@ with st.sidebar:
     """)
     
     # Check if model file exists
-    if os.path.exists('flight_delay2.pkl'):
-        file_size = os.path.getsize('flight_delay2.pkl') / (1024 * 1024)
-        st.success(f"✅ Model file found: {file_size:.1f} MB")
-    else:
-        st.error("❌ model not found!")
-        st.info("Please upload model_protocol4.pkl to the same directory")
+    model_files_to_check = ['flight_delay.pkl', 'flight_delay2.pkl', 'full_pipeline.joblib']
+    found_model = None
+    
+    for model_file in model_files_to_check:
+        if os.path.exists(model_file):
+            file_size = os.path.getsize(model_file) / (1024 * 1024)
+            st.success(f"✅ Found: {model_file} ({file_size:.1f} MB)")
+            found_model = model_file
+            break
+    
+    if not found_model:
+        st.error("❌ No model file found!")
+        st.info("Please upload one of these files:")
+        for file in model_files_to_check:
+            st.code(file)
 
 # Load model
 @st.cache_resource
 def load_model():
-    """Load the trained model"""
-    try:
-        model = joblib.load('flight_delay2.pkl')
-        st.sidebar.success("✅ Model loaded successfully")
-        return model
-    except Exception as e:
-        st.sidebar.error(f"❌ Failed to load model: {str(e)[:100]}")
-        return None
+    """Load the trained model - try multiple methods"""
+    model_files = ['flight_delay.pkl', 'flight_delay2.pkl', 'full_pipeline.joblib']
+    
+    for model_file in model_files:
+        if os.path.exists(model_file):
+            try:
+                # Try joblib first
+                model = joblib.load(model_file)
+                st.sidebar.success(f"✅ Loaded: {model_file} (joblib)")
+                return model
+            except Exception as e1:
+                try:
+                    # Try pickle as fallback
+                    with open(model_file, 'rb') as f:
+                        model = pickle.load(f)
+                    st.sidebar.success(f"✅ Loaded: {model_file} (pickle)")
+                    return model
+                except Exception as e2:
+                    st.sidebar.warning(f"Failed {model_file}: joblib={str(e1)[:50]}, pickle={str(e2)[:50]}")
+                    continue
+    
+    st.sidebar.error("❌ Could not load any model file")
+    return None
 
 # Load the model
 model = load_model()
 
-# Default airline and airport data (from your notebook)
+# Default airline and airport data
 airline_mapping = {
     'AA': 'American Airlines',
     'DL': 'Delta Air Lines', 
@@ -66,21 +91,21 @@ airline_mapping = {
 }
 
 airport_mapping = {
-    'ATL': 'Hartsfield-Jackson Atlanta International Airport',
-    'LAX': 'Los Angeles International Airport',
-    'ORD': 'Chicago O\'Hare International Airport',
-    'DFW': 'Dallas/Fort Worth International Airport',
-    'DEN': 'Denver International Airport',
-    'JFK': 'John F. Kennedy International Airport',
-    'SFO': 'San Francisco International Airport',
-    'SEA': 'Seattle-Tacoma International Airport',
-    'LAS': 'Harry Reid International Airport',
-    'MCO': 'Orlando International Airport'
+    'ATL': 'Atlanta (ATL)',
+    'LAX': 'Los Angeles (LAX)',
+    'ORD': 'Chicago O\'Hare (ORD)',
+    'DFW': 'Dallas/Fort Worth (DFW)',
+    'DEN': 'Denver (DEN)',
+    'JFK': 'New York JFK (JFK)',
+    'SFO': 'San Francisco (SFO)',
+    'SEA': 'Seattle (SEA)',
+    'LAS': 'Las Vegas (LAS)',
+    'MCO': 'Orlando (MCO)'
 }
 
-# Use the unique values from your notebook
-unique_airlines = ['AA', 'DL', 'UA', 'WN', 'B6', 'AS', 'NK', 'F9', 'HA', 'VX']
-unique_airports = ['ATL', 'LAX', 'ORD', 'DFW', 'DEN', 'JFK', 'SFO', 'SEA', 'LAS', 'MCO']
+# Use the unique values
+unique_airlines = list(airline_mapping.keys())
+unique_airports = list(airport_mapping.keys())
 
 # Main input section
 st.header("📋 Flight Details")
@@ -93,7 +118,8 @@ with col1:
     origin_code = st.selectbox(
         "Select Origin Airport",
         options=unique_airports,
-        format_func=lambda x: f"{x} - {airport_mapping.get(x, 'Unknown Airport')}"
+        format_func=lambda x: airport_mapping[x],
+        key="origin"
     )
 
 with col2:
@@ -101,7 +127,8 @@ with col2:
     dest_code = st.selectbox(
         "Select Destination Airport",
         options=unique_airports,
-        format_func=lambda x: f"{x} - {airport_mapping.get(x, 'Unknown Airport')}"
+        format_func=lambda x: airport_mapping[x],
+        key="dest"
     )
 
 with col3:
@@ -109,7 +136,8 @@ with col3:
     airline_code = st.selectbox(
         "Select Airline",
         options=unique_airlines,
-        format_func=lambda x: f"{x} - {airline_mapping.get(x, 'Unknown Airline')}"
+        format_func=lambda x: airline_mapping[x],
+        key="airline"
     )
 
 st.divider()
@@ -123,22 +151,24 @@ with col4:
     month = st.selectbox(
         "Month",
         options=list(range(1, 13)),
-        format_func=lambda x: datetime(2024, x, 1).strftime('%B')
+        format_func=lambda x: datetime(2024, x, 1).strftime('%B'),
+        key="month"
     )
-    day = st.selectbox("Day", options=list(range(1, 32)))
+    day = st.selectbox("Day", options=list(range(1, 32)), key="day")
     day_of_week = st.selectbox(
         "Day of Week",
         options=list(range(1, 8)),
         format_func=lambda x: ["Monday", "Tuesday", "Wednesday", 
-                              "Thursday", "Friday", "Saturday", "Sunday"][x-1]
+                              "Thursday", "Friday", "Saturday", "Sunday"][x-1],
+        key="dow"
     )
 
 with col5:
-    scheduled_departure = st.slider("Departure Hour (24-hour)", 0, 23, 12)
-    distance = st.slider("Distance (miles)", 50, 3000, 500, 50)
-    scheduled_time = st.slider("Flight Time (minutes)", 30, 600, 120, 15)
+    scheduled_departure = st.slider("Departure Hour (24-hour)", 0, 23, 12, key="hour")
+    distance = st.slider("Distance (miles)", 50, 3000, 500, 50, key="distance")
+    scheduled_time = st.slider("Flight Time (minutes)", 30, 600, 120, 15, key="duration")
 
-# Calculate derived features (from your notebook)
+# Calculate derived features
 hour_of_day = scheduled_departure
 is_morning_rush = 1 if hour_of_day in [6, 7, 8] else 0
 is_evening_rush = 1 if hour_of_day in [17, 18, 19] else 0
@@ -202,6 +232,11 @@ input_data = pd.DataFrame([{
     'is_long_flight': is_long_flight
 }])
 
+# Show input data for debugging
+with st.expander("🔍 View Input Data"):
+    st.write("This is what will be sent to the model:")
+    st.dataframe(input_data)
+
 # Prediction button
 st.divider()
 st.header("🎯 Prediction")
@@ -217,7 +252,7 @@ if model is None:
         else:
             st.success(f"✅ **Likely ON TIME** ({1-demo_delay_prob:.1%} probability)")
         
-        st.info("💡 This is a demo. Upload 'model_protocol4.pkl' for real predictions.")
+        st.info("💡 Upload 'flight_delay.pkl' for real predictions.")
 else:
     if st.button("Predict Delay", type="primary", use_container_width=True):
         try:
@@ -253,32 +288,40 @@ else:
             
             # Show flight summary
             with st.expander("📋 View Flight Details"):
-                st.write(f"**Route**: {airline_mapping.get(airline_code, airline_code)} from {airport_mapping.get(origin_code, origin_code)} to {airport_mapping.get(dest_code, dest_code)}")
+                st.write(f"**Airline**: {airline_mapping[airline_code]}")
+                st.write(f"**Route**: {airport_mapping[origin_code]} → {airport_mapping[dest_code]}")
                 st.write(f"**Date**: {datetime(2024, month, day).strftime('%B %d')} ({['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][day_of_week-1]})")
                 st.write(f"**Departure**: {scheduled_departure:02d}:00")
                 st.write(f"**Flight Time**: {scheduled_time} minutes")
                 st.write(f"**Distance**: {distance} miles")
                 
                 # Show risk factors
-                st.write("**Risk Factors**:")
+                risk_factors = []
                 if is_morning_rush or is_evening_rush:
-                    st.write("• Rush hour flight")
+                    risk_factors.append("Rush hour flight")
                 if is_weekend:
-                    st.write("• Weekend travel")
+                    risk_factors.append("Weekend travel")
                 if winter_month:
-                    st.write("• Winter season")
+                    risk_factors.append("Winter season")
                 if holiday_season:
-                    st.write("• Holiday season")
+                    risk_factors.append("Holiday season")
                 if is_short_flight:
-                    st.write("• Short flight (<500 miles)")
+                    risk_factors.append("Short flight (<500 miles)")
                 if is_long_flight:
-                    st.write("• Long flight (>2000 miles)")
+                    risk_factors.append("Long flight (>2000 miles)")
+                
+                if risk_factors:
+                    st.write("**Risk Factors**:")
+                    for factor in risk_factors:
+                        st.write(f"• {factor}")
+                else:
+                    st.write("**Risk Factors**: None (low risk profile)")
             
             # Recommendations
             st.subheader("💡 Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                Consider these options:
+                **Consider these options:**
                 - Book an earlier flight if possible
                 - Allow extra time for connections
                 - Check flight status before heading to airport
@@ -286,41 +329,59 @@ else:
                 """)
             else:
                 st.info("""
-                Your flight looks good!
+                **Your flight looks good!**
                 - Standard arrival time should be fine
                 - Still check flight status before departure
                 - Have a safe trip!
                 """)
                 
         except Exception as e:
-            st.error(f"Prediction error: {str(e)}")
+            st.error(f"❌ Prediction error: {str(e)}")
             
             # Debug information
             with st.expander("🛠️ Debug Information"):
+                st.write("**Error type**:", type(e).__name__)
                 st.write("**Model type**:", type(model))
+                
+                if hasattr(model, 'steps'):
+                    st.write("**Pipeline steps**:", [step[0] for step in model.steps])
+                
                 st.write("**Input columns**:", list(input_data.columns))
                 st.write("**Input data shape**:", input_data.shape)
                 
-                if hasattr(model, 'n_features_in_'):
-                    st.write("**Model expects features**:", model.n_features_in_)
-                elif hasattr(model, 'feature_names_in_'):
-                    st.write("**Model feature names**:", list(model.feature_names_in_))
+                # Check if it's a pipeline issue
+                if "could not convert string to float" in str(e):
+                    st.info("""
+                    **Common issue**: The model expects preprocessed data but got raw strings.
+                    
+                    **Solution**: Make sure you're using the FULL pipeline (flight_delay.pkl),
+                    not just the classifier (model_protocol4.pkl).
+                    """)
+                elif "No module named 'imblearn'" in str(e):
+                    st.info("""
+                    **imblearn issue**: The model was trained with SMOTE from imblearn.
+                    
+                    **Solution**: 
+                    1. Install imblearn: `pip install imbalanced-learn`
+                    2. Or recreate model without imblearn dependencies
+                    """)
 
 # Footer
 st.divider()
 st.caption("""
 **Note**: Predictions are based on historical data. Actual delays may vary due to weather, 
-air traffic control, or operational factors. Always check with your airline for the most 
-up-to-date flight information.
+air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
 
-# Requirements for deployment
-st.sidebar.divider()
-st.sidebar.header("📦 Requirements")
-st.sidebar.code("""
+# Requirements
+with st.sidebar:
+    st.divider()
+    st.header("📦 Requirements")
+    st.code("""
 streamlit==1.28.0
 pandas==2.1.3
 numpy==1.24.3
 scikit-learn==1.3.2
 joblib==1.3.2
+imbalanced-learn==0.11.0  # Only if using flight_delay.pkl with SMOTE
 """)
