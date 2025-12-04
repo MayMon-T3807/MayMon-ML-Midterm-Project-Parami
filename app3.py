@@ -41,7 +41,7 @@ with st.sidebar:
 def load_model():
     """Load the trained model"""
     try:
-        model = joblib.load('model_protocol4.pkl')
+        model = joblib.load('flight_delay2.pkl')
         st.sidebar.success("✅ Model loaded successfully")
         return model
     except Exception as e:
