@@ -29,11 +29,11 @@ with st.sidebar:
     """)
     
     # Check if model file exists
-    if os.path.exists('model_protocol4.pkl'):
-        file_size = os.path.getsize('model_protocol4.pkl') / (1024 * 1024)
+    if os.path.exists('flight_delay2.pkl'):
+        file_size = os.path.getsize('flight_delay2.pkl') / (1024 * 1024)
         st.success(f"✅ Model file found: {file_size:.1f} MB")
     else:
-        st.error("❌ model_protocol4.pkl not found!")
+        st.error("❌ model not found!")
         st.info("Please upload model_protocol4.pkl to the same directory")
 
 # Load model
