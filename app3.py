@@ -16,7 +16,7 @@ st.title("Flight Delay Predictor")
 st.markdown("Predict if your flight will be delayed by more than 15 minutes")
 
 with st.sidebar:
-    st.header("Student Information")
+    st.header("Project Information")
     
     st.info("""
     Student ID: PIUS20230024 
@@ -137,7 +137,7 @@ st.divider()
 
 st.header("Additional Flight Settings")
 
-col6, col7 = st.columns(2)
+col6, col7, col8 = st.columns(3)
 
 with col6:
     rush_hour_options = ["Normal", "Morning Rush (6-8 AM)", "Evening Rush (5-7 PM)"]
@@ -169,6 +169,14 @@ with col7:
         horizontal=True
     )
 
+with col8:
+    flight_length_options = ["Short (<500 miles)", "Medium (500-2000 miles)", "Long (>2000 miles)"]
+    flight_length_selection = st.selectbox(
+        "Flight Length",
+        options=flight_length_options,
+        index=1
+    )
+
 hour_of_day = scheduled_departure
 
 is_morning_rush = 1 if rush_hour_selection == "Morning Rush (6-8 AM)" else 0
@@ -194,6 +202,12 @@ if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
 
+is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
+is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
+if flight_length_selection == "Medium (500-2000 miles)":
+    is_short_flight = 1 if distance < 500 else 0
+    is_long_flight = 1 if distance > 2000 else 0
+
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
 
 input_data = pd.DataFrame([{
@@ -214,7 +228,9 @@ input_data = pd.DataFrame([{
     'is_weekend': is_weekend,
     'winter_month': winter_month,
     'summer_month': summer_month,
-    'holiday_season': holiday_season
+    'holiday_season': holiday_season,
+    'is_short_flight': is_short_flight,
+    'is_long_flight': is_long_flight
 }])
 
 with st.expander("View Input Data"):
@@ -225,7 +241,16 @@ st.divider()
 st.header("Prediction")
 
 if model is None:
-    st.error("Model not loaded. Please ensure 'flight_delay.pkl' is in the current directory.")
+    st.warning("Model not loaded. Running in demo mode.")
+    
+    if st.button("Demo Prediction", type="primary", use_container_width=True):
+        demo_delay_prob = np.random.uniform(0.2, 0.8)
+        if demo_delay_prob > 0.5:
+            st.error(f"Likely DELAYED ({demo_delay_prob:.1%} probability)")
+        else:
+            st.success(f"Likely ON TIME ({1-demo_delay_prob:.1%} probability)")
+        
+        st.info("Upload 'flight_delay.pkl' for real predictions.")
 else:
     if st.button("Predict Delay", type="primary", use_container_width=True):
         try:
@@ -266,6 +291,7 @@ else:
                 st.write(f"- Weekend: {'Yes' if is_weekend else 'No'}")
                 st.write(f"- Season: {'Winter' if winter_month else 'Summer' if summer_month else 'Holiday' if holiday_season else 'Regular'}")
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
+                st.write(f"- Flight Length: {'Short' if is_short_flight else 'Long' if is_long_flight else 'Medium'}")
                 
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
@@ -276,6 +302,10 @@ else:
                     risk_factors.append("Winter season")
                 if holiday_season:
                     risk_factors.append("Holiday season")
+                if is_short_flight:
+                    risk_factors.append("Short flight (<500 miles)")
+                if is_long_flight:
+                    risk_factors.append("Long flight (>2000 miles)")
                 
                 if risk_factors:
                     st.write("Risk Factors:")
@@ -287,11 +317,18 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
+                Consider these options:
                 - Book an earlier flight if possible
+                - Allow extra time for connections
+                - Check flight status before heading to airport
+                - Consider travel insurance
                 """)
             else:
                 st.info("""
-                Your flight looks good and Have a safe trip.
+                Your flight looks good!
+                - Standard arrival time should be fine
+                - Still check flight status before departure
+                - Have a safe trip!
                 """)
                 
         except Exception as e:
