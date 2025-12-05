@@ -170,11 +170,31 @@ with col7:
     )
 
 with col8:
+    # Flight Length Category dropdown
     flight_length_options = ["Short (<500 miles)", "Medium (500-2000 miles)", "Long (>2000 miles)"]
     flight_length_selection = st.selectbox(
-        "Flight Length",
+        "Flight Length Category",
         options=flight_length_options,
         index=1
+    )
+    
+    # ADDED: Direct Yes/No controls for short and long flight
+    st.write("**Flight Type:**")
+    
+    short_flight_override = st.radio(
+        "Short Flight (<500 miles)",
+        options=["No", "Yes"],
+        index=0,
+        horizontal=True,
+        key="short_flight"
+    )
+    
+    long_flight_override = st.radio(
+        "Long Flight (>2000 miles)",
+        options=["No", "Yes"],
+        index=0,
+        horizontal=True,
+        key="long_flight"
     )
 
 hour_of_day = scheduled_departure
@@ -202,11 +222,27 @@ if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
 
-is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
-is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
-if flight_length_selection == "Medium (500-2000 miles)":
-    is_short_flight = 1 if distance < 500 else 0
-    is_long_flight = 1 if distance > 2000 else 0
+# Calculate is_short_flight and is_long_flight based on user selection
+# First check if user manually overrode with Yes/No
+if short_flight_override == "Yes":
+    is_short_flight = 1
+elif short_flight_override == "No":
+    is_short_flight = 0
+else:
+    # Auto-calculate based on flight length selection
+    is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
+    if flight_length_selection == "Medium (500-2000 miles)":
+        is_short_flight = 1 if distance < 500 else 0
+
+if long_flight_override == "Yes":
+    is_long_flight = 1
+elif long_flight_override == "No":
+    is_long_flight = 0
+else:
+    # Auto-calculate based on flight length selection
+    is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
+    if flight_length_selection == "Medium (500-2000 miles)":
+        is_long_flight = 1 if distance > 2000 else 0
 
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
 
@@ -291,7 +327,9 @@ else:
                 st.write(f"- Weekend: {'Yes' if is_weekend else 'No'}")
                 st.write(f"- Season: {'Winter' if winter_month else 'Summer' if summer_month else 'Holiday' if holiday_season else 'Regular'}")
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
-                st.write(f"- Flight Length: {'Short' if is_short_flight else 'Long' if is_long_flight else 'Medium'}")
+                st.write(f"- Flight Length Category: {flight_length_selection}")
+                st.write(f"- Short Flight: {'Yes' if is_short_flight else 'No'} (is_short_flight: {is_short_flight})")
+                st.write(f"- Long Flight: {'Yes' if is_long_flight else 'No'} (is_long_flight: {is_long_flight})")
                 
                 # ADDED: Show binary features
                 st.write("Binary Features (for model input):")
