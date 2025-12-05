@@ -241,7 +241,16 @@ st.divider()
 st.header("Prediction")
 
 if model is None:
-    st.error("Model not loaded. Please ensure 'flight_delay.pkl' is in the current directory.")
+    st.warning("Model not loaded. Running in demo mode.")
+    
+    if st.button("Demo Prediction", type="primary", use_container_width=True):
+        demo_delay_prob = np.random.uniform(0.2, 0.8)
+        if demo_delay_prob > 0.5:
+            st.error(f"Likely DELAYED ({demo_delay_prob:.1%} probability)")
+        else:
+            st.success(f"Likely ON TIME ({1-demo_delay_prob:.1%} probability)")
+        
+        st.info("Upload 'flight_delay.pkl' for real predictions.")
 else:
     if st.button("Predict Delay", type="primary", use_container_width=True):
         try:
