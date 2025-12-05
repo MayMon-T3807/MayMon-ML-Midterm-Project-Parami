@@ -331,18 +331,11 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                Consider these options:
-                - Book an earlier flight if possible
-                - Allow extra time for connections
-                - Check flight status before heading to airport
-                - Consider travel insurance
+                 Book an earlier flight if possible.
                 """)
             else:
                 st.info("""
-                Your flight looks good!
-                - Standard arrival time should be fine
-                - Still check flight status before departure
-                - Have a safe trip!
+                Your flight looks good and have a safe trip!
                 """)
                 
         except Exception as e:
