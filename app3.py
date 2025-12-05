@@ -333,18 +333,11 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                Consider these options:
-                - Book an earlier flight if possible
-                - Allow extra time for connections
-                - Check flight status before heading to airport
-                - Consider travel insurance
+                Book an earlier flight if possible and arrive at the airport early.
                 """)
             else:
                 st.info("""
-                Your flight looks good!
-                - Standard arrival time should be fine
-                - Still check flight status before departure
-                - Have a safe trip!
+                Your flight looks good and Have a safe trip!
                 """)
                 
         except Exception as e:
@@ -364,15 +357,4 @@ st.divider()
 st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather, 
 air traffic control, or operational factors. Always check with your airline for official flight status.
-""")
-
-st.divider()
-st.header("Requirements")
-st.code("""
-streamlit==1.28.0
-pandas==2.1.3
-numpy==1.24.3
-scikit-learn==1.3.2
-joblib==1.3.2
-imbalanced-learn==0.11.0
 """)
