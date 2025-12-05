@@ -28,20 +28,20 @@ with st.sidebar:
 
 @st.cache_resource
 def load_model():
-    if os.path.exists('flight_delay2.pkl'):
+    if os.path.exists('flight_delay.pkl'):
         try:
-            model = joblib.load('flight_delay2.pkl')
+            model = joblib.load('flight_delay.pkl')
             return model
         except Exception as e1:
             try:
-                with open('flight_delay.pkl2', 'rb') as f:
+                with open('flight_delay.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
             except Exception as e2:
                 st.error(f"Failed to load model: {str(e2)[:100]}")
                 return None
     else:
-        st.error("Model file 'flight_delay.pkl2' not found")
+        st.error("Model file 'flight_delay.pkl' not found")
         return None
 
 model = load_model()
@@ -176,14 +176,6 @@ with col8:
         options=flight_length_options,
         index=1
     )
-    
-    distance_override = st.slider(
-        "Distance Override (miles)",
-        min_value=50,
-        max_value=3000,
-        value=500,
-        step=50
-    )
 
 hour_of_day = scheduled_departure
 
@@ -215,12 +207,6 @@ is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
 if flight_length_selection == "Medium (500-2000 miles)":
     is_short_flight = 1 if distance < 500 else 0
     is_long_flight = 1 if distance > 2000 else 0
-
-if distance_override != distance:
-    distance = distance_override
-    if flight_length_selection == "Medium (500-2000 miles)":
-        is_short_flight = 1 if distance < 500 else 0
-        is_long_flight = 1 if distance > 2000 else 0
 
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
 
@@ -331,11 +317,11 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                 Book an earlier flight if possible.
+            Book an earlier flight if possible
                 """)
             else:
                 st.info("""
-                Your flight looks good and have a safe trip!
+                Your flight looks good and have a safe flight.
                 """)
                 
         except Exception as e:
