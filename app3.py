@@ -16,7 +16,7 @@ st.title("Flight Delay Predictor")
 st.markdown("Predict if your flight will be delayed by more than 15 minutes")
 
 with st.sidebar:
-    st.header("Project Information")
+    st.header("Student Information")
     
     st.info("""
     Student ID: PIUS20230024 
@@ -367,18 +367,11 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                Consider these options:
-                - Book an earlier flight if possible
-                - Allow extra time for connections
-                - Check flight status before heading to airport
-                - Consider travel insurance
+                Book an earlier flight if possible
                 """)
             else:
                 st.info("""
-                Your flight looks good!
-                - Standard arrival time should be fine
-                - Still check flight status before departure
-                - Have a safe trip!
+                Your flight looks good and Have a safe trip!
                 """)
                 
         except Exception as e:
