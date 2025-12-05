@@ -293,6 +293,18 @@ else:
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
                 st.write(f"- Flight Length: {'Short' if is_short_flight else 'Long' if is_long_flight else 'Medium'}")
                 
+                # ADDED: Show binary features
+                st.write("Binary Features (for model input):")
+                st.write(f"- is_short_flight: {is_short_flight}")
+                st.write(f"- is_long_flight: {is_long_flight}")
+                st.write(f"- is_morning_rush: {is_morning_rush}")
+                st.write(f"- is_evening_rush: {is_evening_rush}")
+                st.write(f"- is_night_flight: {is_night_flight}")
+                st.write(f"- is_weekend: {is_weekend}")
+                st.write(f"- winter_month: {winter_month}")
+                st.write(f"- summer_month: {summer_month}")
+                st.write(f"- holiday_season: {holiday_season}")
+                
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
                     risk_factors.append("Rush hour flight")
@@ -317,11 +329,18 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-            Book an earlier flight if possible
+                Consider these options:
+                - Book an earlier flight if possible
+                - Allow extra time for connections
+                - Check flight status before heading to airport
+                - Consider travel insurance
                 """)
             else:
                 st.info("""
-                Your flight looks good and have a safe flight.
+                Your flight looks good!
+                - Standard arrival time should be fine
+                - Still check flight status before departure
+                - Have a safe trip!
                 """)
                 
         except Exception as e:
