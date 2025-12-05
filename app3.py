@@ -289,10 +289,8 @@ else:
             with col_result2:
                 if prediction[0] == 1:
                     st.error("FLIGHT LIKELY TO BE DELAYED")
-                    st.markdown(f"Confidence: {delay_prob:.1f}%")
                 else:
                     st.success("FLIGHT LIKELY TO BE ON TIME")
-                    st.markdown(f"Confidence: {on_time_prob:.1f}%")
             
             with st.expander("View Flight Details"):
                 st.write(f"Airline: {airline_mapping[airline_code]}")
@@ -333,11 +331,18 @@ else:
             st.subheader("Recommendations")
             if prediction[0] == 1:
                 st.warning("""
-                Book an earlier flight if possible and arrive at the airport early.
+                Consider these options:
+                - Book an earlier flight if possible
+                - Allow extra time for connections
+                - Check flight status before heading to airport
+                - Consider travel insurance
                 """)
             else:
                 st.info("""
-                Your flight looks good and Have a safe trip!
+                Your flight looks good!
+                - Standard arrival time should be fine
+                - Still check flight status before departure
+                - Have a safe trip!
                 """)
                 
         except Exception as e:
