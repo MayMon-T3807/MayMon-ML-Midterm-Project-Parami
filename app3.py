@@ -52,31 +52,95 @@ def load_model():
 model = load_model()
 
 
+
 airline_mapping = {
-    'AA': 'American Airlines',
-    'DL': 'Delta Air Lines',
-    'UA': 'United Airlines',
-    'WN': 'Southwest Airlines',
-    'B6': 'JetBlue Airways',
-    'AS': 'Alaska Airlines',
-    'NK': 'Spirit Airlines',
-    'F9': 'Frontier Airlines',
-    'HA': 'Hawaiian Airlines',
-    'VX': 'Virgin America'
+    'UA': 'United Air Lines Inc. (UA)',
+    'AA': 'American Airlines Inc. (AA)',
+    'US': 'US Airways Inc. (US)',
+    'F9': 'Frontier Airlines Inc. (F9)',
+    'B6': 'JetBlue Airways (B6)',
+    'OO': 'Skywest Airlines Inc. (OO)',
+    'AS': 'Alaska Airlines Inc. (AS)',
+    'NK': 'Spirit Air Lines (NK)',
+    'WN': 'Southwest Airlines Co. (WN)',
+    'DL': 'Delta Air Lines Inc. (DL)',
+    'EV': 'Atlantic Southeast Airlines (EV)',
+    'HA': 'Hawaiian Airlines Inc. (HA)',
+    'MQ': 'American Eagle Airlines Inc. (MQ)',
+    'VX': 'Virgin America (VX)'
 }
 
 
 airport_mapping = {
-    'ATL': 'Atlanta (ATL)',
-    'LAX': 'Los Angeles (LAX)',
-    'ORD': 'Chicago O\'Hare (ORD)',
-    'DFW': 'Dallas/Fort Worth (DFW)',
-    'DEN': 'Denver (DEN)',
-    'JFK': 'New York JFK (JFK)',
-    'SFO': 'San Francisco (SFO)',
-    'SEA': 'Seattle (SEA)',
-    'LAS': 'Las Vegas (LAS)',
-    'MCO': 'Orlando (MCO)'
+   
+    'ATL': 'Atlanta Hartsfield-Jackson (ATL)',
+    'LAX': 'Los Angeles International (LAX)',
+    'ORD': 'Chicago O\'Hare International (ORD)',
+    'DFW': 'Dallas/Fort Worth International (DFW)',
+    'DEN': 'Denver International (DEN)',
+    'JFK': 'New York JFK International (JFK)',
+    'SFO': 'San Francisco International (SFO)',
+    'SEA': 'Seattle-Tacoma International (SEA)',
+    'LAS': 'Las Vegas McCarran International (LAS)',
+    'MCO': 'Orlando International (MCO)',
+    'CLT': 'Charlotte Douglas International (CLT)',
+    'MIA': 'Miami International (MIA)',
+    'PHX': 'Phoenix Sky Harbor International (PHX)',
+    'IAH': 'Houston George Bush Intercontinental (IAH)',
+    'BOS': 'Boston Logan International (BOS)',
+    'MSP': 'Minneapolis-Saint Paul International (MSP)',
+    'FLL': 'Fort Lauderdale-Hollywood International (FLL)',
+    'DTW': 'Detroit Metropolitan (DTW)',
+    'PHL': 'Philadelphia International (PHL)',
+    'LGA': 'New York LaGuardia (LGA)',
+    'BWI': 'Baltimore/Washington International (BWI)',
+    'SLC': 'Salt Lake City International (SLC)',
+    'SAN': 'San Diego International (SAN)',
+    'IAD': 'Washington Dulles International (IAD)',
+    'DCA': 'Washington Reagan National (DCA)',
+    'MDW': 'Chicago Midway International (MDW)',
+    'TPA': 'Tampa International (TPA)',
+    'PDX': 'Portland International (PDX)',
+    'HNL': 'Honolulu International (HNL)',
+    'STL': 'St. Louis Lambert International (STL)',
+    'BNA': 'Nashville International (BNA)',
+    'AUS': 'Austin-Bergstrom International (AUS)',
+    'MSY': 'New Orleans Louis Armstrong International (MSY)',
+    'RDU': 'Raleigh-Durham International (RDU)',
+    'MCI': 'Kansas City International (MCI)',
+    'SJC': 'San Jose International (SJC)',
+    'SMF': 'Sacramento International (SMF)',
+    'SAT': 'San Antonio International (SAT)',
+    'CVG': 'Cincinnati/Northern Kentucky International (CVG)',
+    'CLE': 'Cleveland Hopkins International (CLE)',
+    'IND': 'Indianapolis International (IND)',
+    'CMH': 'Columbus International (CMH)',
+    'PIT': 'Pittsburgh International (PIT)',
+    'MKE': 'Milwaukee Mitchell International (MKE)',
+    'OMA': 'Omaha Eppley Airfield (OMA)',
+    'BUF': 'Buffalo Niagara International (BUF)',
+    'MEM': 'Memphis International (MEM)',
+    'ABQ': 'Albuquerque International Sunport (ABQ)',
+    'TUS': 'Tucson International (TUS)',
+    'OKC': 'Oklahoma City Will Rogers World (OKC)',
+    'TUL': 'Tulsa International (TUL)',
+    'ANC': 'Anchorage Ted Stevens International (ANC)',
+    'FAI': 'Fairbanks International (FAI)',
+    'ELP': 'El Paso International (ELP)',
+    'ALB': 'Albany International (ALB)',
+    'BHM': 'Birmingham-Shuttlesworth International (BHM)',
+    'DAY': 'Dayton International (DAY)',
+    'GSO': 'Greensboro Piedmont Triad International (GSO)',
+    'GRR': 'Grand Rapids Gerald R. Ford International (GRR)',
+    'HSV': 'Huntsville International (HSV)',
+    'JAX': 'Jacksonville International (JAX)',
+    'LIT': 'Little Rock Bill and Hillary Clinton National (LIT)',
+    'PBI': 'West Palm Beach International (PBI)',
+    'RNO': 'Reno/Tahoe International (RNO)',
+    'ROC': 'Rochester International (ROC)',
+    'SDF': 'Louisville International (SDF)',
+    'SYR': 'Syracuse Hancock International (SYR)',
+    'TYS': 'Knoxville McGhee Tyson (TYS)',
 }
 
 
@@ -194,15 +258,12 @@ with col7:
 
 
 with col8:
-    # Flight Length Category dropdown
     flight_length_options = ["Short (<500 miles)", "Medium (500-2000 miles)", "Long (>2000 miles)"]
     flight_length_selection = st.selectbox(
         "Flight Length Category",
         options=flight_length_options,
         index=1
     )
-   
-    # ADDED: Direct Yes/No controls for short and long flight
     st.write("**Flight Type:**")
    
     short_flight_override = st.radio(
@@ -252,15 +313,11 @@ if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
 
-
-# Calculate is_short_flight and is_long_flight based on user selection
-# First check if user manually overrode with Yes/No
 if short_flight_override == "Yes":
     is_short_flight = 1
 elif short_flight_override == "No":
     is_short_flight = 0
 else:
-    # Auto-calculate based on flight length selection
     is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
     if flight_length_selection == "Medium (500-2000 miles)":
         is_short_flight = 1 if distance < 500 else 0
@@ -271,7 +328,6 @@ if long_flight_override == "Yes":
 elif long_flight_override == "No":
     is_long_flight = 0
 else:
-    # Auto-calculate based on flight length selection
     is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
     if flight_length_selection == "Medium (500-2000 miles)":
         is_long_flight = 1 if distance > 2000 else 0
@@ -408,7 +464,7 @@ else:
                 """)
             else:
                 st.info("""
-                Your flight looks good and Have a safe trip!
+                No sign of delay and Have a safe trip!
                 """)
                
         except Exception as e:
@@ -430,4 +486,3 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
-
