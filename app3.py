@@ -210,26 +210,23 @@ with col4:
 
 
 with col5:
-    # Changed from slider to selectbox for Departure Hour
     departure_hours = [f"{hour:02d}:00" for hour in range(0, 24)]
     departure_hour_display = st.selectbox(
         "Departure Hour (24-hour)",
         options=departure_hours,
-        index=12,  # Default to 12:00
+        index=12, 
         key="hour_display"
     )
-    scheduled_departure = int(departure_hour_display.split(":")[0])  # Extract hour from "HH:00"
+    scheduled_departure = int(departure_hour_display.split(":")[0])  
     
-    # Distance slider remains as is
     distance = st.slider("Distance (miles)", 50, 3000, 500, 50, key="distance")
     
-    # Changed from slider to selectbox for Flight Time
-    flight_times = list(range(30, 601, 15))  # From 30 to 600 minutes in 15-minute increments
+    flight_times = list(range(30, 601, 15))  
     flight_time_options = [f"{time // 60}h {time % 60}min" if time >= 60 else f"{time}min" for time in flight_times]
     flight_time_display = st.selectbox(
         "Flight Time",
         options=flight_time_options,
-        index=flight_times.index(120),  # Default to 120 minutes (2 hours)
+        index=flight_times.index(120),  
         key="duration_display"
     )
     scheduled_time = flight_times[flight_time_options.index(flight_time_display)]
@@ -280,8 +277,7 @@ with col8:
     
     st.write("**Flight Summary:**")
     st.write(f"Distance: {distance} miles")
-    
-    # Automatically determine flight type based on distance
+
     if distance < 500:
         flight_type = "Short (<500 miles)"
     elif distance <= 2000:
@@ -321,8 +317,6 @@ if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     winter_month = 1 if month in [12, 1, 2] else 0
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
-
-# Simplified flight type determination based only on distance
 is_short_flight = 1 if distance < 500 else 0
 is_long_flight = 1 if distance > 2000 else 0
 
@@ -416,18 +410,7 @@ else:
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
                 st.write(f"- Flight Type: {flight_type}")
                
-                # Show binary features
-                st.write("Binary Features (for model input):")
-                st.write(f"- is_short_flight: {is_short_flight}")
-                st.write(f"- is_long_flight: {is_long_flight}")
-                st.write(f"- is_morning_rush: {is_morning_rush}")
-                st.write(f"- is_evening_rush: {is_evening_rush}")
-                st.write(f"- is_night_flight: {is_night_flight}")
-                st.write(f"- is_weekend: {is_weekend}")
-                st.write(f"- winter_month: {winter_month}")
-                st.write(f"- summer_month: {summer_month}")
-                st.write(f"- holiday_season: {holiday_season}")
-               
+                # Risk Factors section remains
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
                     risk_factors.append("Rush hour flight")
