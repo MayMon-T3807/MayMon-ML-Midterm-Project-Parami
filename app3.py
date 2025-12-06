@@ -72,7 +72,6 @@ airline_mapping = {
 
 
 airport_mapping = {
-   
     'ATL': 'Atlanta Hartsfield-Jackson (ATL)',
     'LAX': 'Los Angeles International (LAX)',
     'ORD': 'Chicago O\'Hare International (ORD)',
@@ -211,9 +210,29 @@ with col4:
 
 
 with col5:
-    scheduled_departure = st.slider("Departure Hour (24-hour)", 0, 23, 12, key="hour")
+    # Changed from slider to selectbox for Departure Hour
+    departure_hours = [f"{hour:02d}:00" for hour in range(0, 24)]
+    departure_hour_display = st.selectbox(
+        "Departure Hour (24-hour)",
+        options=departure_hours,
+        index=12,  # Default to 12:00
+        key="hour_display"
+    )
+    scheduled_departure = int(departure_hour_display.split(":")[0])  # Extract hour from "HH:00"
+    
+    # Distance slider remains as is
     distance = st.slider("Distance (miles)", 50, 3000, 500, 50, key="distance")
-    scheduled_time = st.slider("Flight Time (minutes)", 30, 600, 120, 15, key="duration")
+    
+    # Changed from slider to selectbox for Flight Time
+    flight_times = list(range(30, 601, 15))  # From 30 to 600 minutes in 15-minute increments
+    flight_time_options = [f"{time // 60}h {time % 60}min" if time >= 60 else f"{time}min" for time in flight_times]
+    flight_time_display = st.selectbox(
+        "Flight Time",
+        options=flight_time_options,
+        index=flight_times.index(120),  # Default to 120 minutes (2 hours)
+        key="duration_display"
+    )
+    scheduled_time = flight_times[flight_time_options.index(flight_time_display)]
 
 
 st.divider()
@@ -258,29 +277,19 @@ with col7:
 
 
 with col8:
-    flight_length_options = ["Short (<500 miles)", "Medium (500-2000 miles)", "Long (>2000 miles)"]
-    flight_length_selection = st.selectbox(
-        "Flight Length Category",
-        options=flight_length_options,
-        index=1
-    )
-    st.write("**Flight Type:**")
-   
-    short_flight_override = st.radio(
-        "Short Flight (<500 miles)",
-        options=["No", "Yes"],
-        index=0,
-        horizontal=True,
-        key="short_flight"
-    )
-   
-    long_flight_override = st.radio(
-        "Long Flight (>2000 miles)",
-        options=["No", "Yes"],
-        index=0,
-        horizontal=True,
-        key="long_flight"
-    )
+    
+    st.write("**Flight Summary:**")
+    st.write(f"Distance: {distance} miles")
+    
+    # Automatically determine flight type based on distance
+    if distance < 500:
+        flight_type = "Short (<500 miles)"
+    elif distance <= 2000:
+        flight_type = "Medium (500-2000 miles)"
+    else:
+        flight_type = "Long (>2000 miles)"
+    
+    st.write(f"Flight Type: {flight_type}")
 
 
 hour_of_day = scheduled_departure
@@ -313,24 +322,9 @@ if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
 
-if short_flight_override == "Yes":
-    is_short_flight = 1
-elif short_flight_override == "No":
-    is_short_flight = 0
-else:
-    is_short_flight = 1 if flight_length_selection == "Short (<500 miles)" else 0
-    if flight_length_selection == "Medium (500-2000 miles)":
-        is_short_flight = 1 if distance < 500 else 0
-
-
-if long_flight_override == "Yes":
-    is_long_flight = 1
-elif long_flight_override == "No":
-    is_long_flight = 0
-else:
-    is_long_flight = 1 if flight_length_selection == "Long (>2000 miles)" else 0
-    if flight_length_selection == "Medium (500-2000 miles)":
-        is_long_flight = 1 if distance > 2000 else 0
+# Simplified flight type determination based only on distance
+is_short_flight = 1 if distance < 500 else 0
+is_long_flight = 1 if distance > 2000 else 0
 
 
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
@@ -411,8 +405,8 @@ else:
                 st.write(f"Airline: {airline_mapping[airline_code]}")
                 st.write(f"Route: {airport_mapping[origin_code]} to {airport_mapping[dest_code]}")
                 st.write(f"Date: {datetime(2024, month, day).strftime('%B %d')} ({['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][day_of_week-1]})")
-                st.write(f"Departure: {scheduled_departure:02d}:00")
-                st.write(f"Flight Time: {scheduled_time} minutes")
+                st.write(f"Departure: {departure_hour_display}")
+                st.write(f"Flight Time: {flight_time_display}")
                 st.write(f"Distance: {distance} miles")
                
                 st.write("Flight Settings:")
@@ -420,11 +414,9 @@ else:
                 st.write(f"- Weekend: {'Yes' if is_weekend else 'No'}")
                 st.write(f"- Season: {'Winter' if winter_month else 'Summer' if summer_month else 'Holiday' if holiday_season else 'Regular'}")
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
-                st.write(f"- Flight Length Category: {flight_length_selection}")
-                st.write(f"- Short Flight: {'Yes' if is_short_flight else 'No'} (is_short_flight: {is_short_flight})")
-                st.write(f"- Long Flight: {'Yes' if is_long_flight else 'No'} (is_long_flight: {is_long_flight})")
+                st.write(f"- Flight Type: {flight_type}")
                
-                # ADDED: Show binary features
+                # Show binary features
                 st.write("Binary Features (for model input):")
                 st.write(f"- is_short_flight: {is_short_flight}")
                 st.write(f"- is_long_flight: {is_long_flight}")
