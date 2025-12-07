@@ -22,7 +22,7 @@ with st.sidebar:
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("flight_delay2.pkl")
+        return joblib.load("flight_delay3.pkl")
     except:
         st.error("Model file 'flight_delay.pkl' not found or failed to load.")
         return None
@@ -49,7 +49,7 @@ airline_mapping = {
 airport_mapping = {
     'ATL': 'Atlanta Hartsfield-Jackson (ATL)',
     'LAX': 'Los Angeles International (LAX)',
-    'ORD': "Chicago O'Hare International (ORD)",
+    'ORD': 'Chicago O\'Hare International (ORD)',
     'DFW': 'Dallas/Fort Worth International (DFW)',
     'DEN': 'Denver International (DEN)',
     'JFK': 'New York JFK International (JFK)',
@@ -57,7 +57,66 @@ airport_mapping = {
     'SEA': 'Seattle-Tacoma International (SEA)',
     'LAS': 'Las Vegas McCarran International (LAS)',
     'MCO': 'Orlando International (MCO)',
+    'CLT': 'Charlotte Douglas International (CLT)',
+    'MIA': 'Miami International (MIA)',
+    'PHX': 'Phoenix Sky Harbor International (PHX)',
+    'IAH': 'Houston George Bush Intercontinental (IAH)',
+    'BOS': 'Boston Logan International (BOS)',
+    'MSP': 'Minneapolis-Saint Paul International (MSP)',
+    'FLL': 'Fort Lauderdale-Hollywood International (FLL)',
+    'DTW': 'Detroit Metropolitan (DTW)',
+    'PHL': 'Philadelphia International (PHL)',
+    'LGA': 'New York LaGuardia (LGA)',
+    'BWI': 'Baltimore/Washington International (BWI)',
+    'SLC': 'Salt Lake City International (SLC)',
+    'SAN': 'San Diego International (SAN)',
+    'IAD': 'Washington Dulles International (IAD)',
+    'DCA': 'Washington Reagan National (DCA)',
+    'MDW': 'Chicago Midway International (MDW)',
+    'TPA': 'Tampa International (TPA)',
+    'PDX': 'Portland International (PDX)',
+    'HNL': 'Honolulu International (HNL)',
+    'STL': 'St. Louis Lambert International (STL)',
+    'BNA': 'Nashville International (BNA)',
+    'AUS': 'Austin-Bergstrom International (AUS)',
+    'MSY': 'New Orleans Louis Armstrong International (MSY)',
+    'RDU': 'Raleigh-Durham International (RDU)',
+    'MCI': 'Kansas City International (MCI)',
+    'SJC': 'San Jose International (SJC)',
+    'SMF': 'Sacramento International (SMF)',
+    'SAT': 'San Antonio International (SAT)',
+    'CVG': 'Cincinnati/Northern Kentucky International (CVG)',
+    'CLE': 'Cleveland Hopkins International (CLE)',
+    'IND': 'Indianapolis International (IND)',
+    'CMH': 'Columbus International (CMH)',
+    'PIT': 'Pittsburgh International (PIT)',
+    'MKE': 'Milwaukee Mitchell International (MKE)',
+    'OMA': 'Omaha Eppley Airfield (OMA)',
+    'BUF': 'Buffalo Niagara International (BUF)',
+    'MEM': 'Memphis International (MEM)',
+    'ABQ': 'Albuquerque International Sunport (ABQ)',
+    'TUS': 'Tucson International (TUS)',
+    'OKC': 'Oklahoma City Will Rogers World (OKC)',
+    'TUL': 'Tulsa International (TUL)',
+    'ANC': 'Anchorage Ted Stevens International (ANC)',
+    'FAI': 'Fairbanks International (FAI)',
+    'ELP': 'El Paso International (ELP)',
+    'ALB': 'Albany International (ALB)',
+    'BHM': 'Birmingham-Shuttlesworth International (BHM)',
+    'DAY': 'Dayton International (DAY)',
+    'GSO': 'Greensboro Piedmont Triad International (GSO)',
+    'GRR': 'Grand Rapids Gerald R. Ford International (GRR)',
+    'HSV': 'Huntsville International (HSV)',
+    'JAX': 'Jacksonville International (JAX)',
+    'LIT': 'Little Rock Bill and Hillary Clinton National (LIT)',
+    'PBI': 'West Palm Beach International (PBI)',
+    'RNO': 'Reno/Tahoe International (RNO)',
+    'ROC': 'Rochester International (ROC)',
+    'SDF': 'Louisville International (SDF)',
+    'SYR': 'Syracuse Hancock International (SYR)',
+    'TYS': 'Knoxville McGhee Tyson (TYS)',
 }
+
 
 st.header("Flight Information")
 
@@ -127,3 +186,4 @@ if st.button("Predict Delay"):
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
+
