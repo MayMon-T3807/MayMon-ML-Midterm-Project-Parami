@@ -224,7 +224,7 @@ with col5:
     flight_times = list(range(30, 601, 15))  
     flight_time_options = [f"{time // 60}h {time % 60}min" if time >= 60 else f"{time}min" for time in flight_times]
     flight_time_display = st.selectbox(
-        "Flight Time",
+        "Flight Duration",
         options=flight_time_options,
         index=flight_times.index(120),  
         key="duration_display"
@@ -400,7 +400,7 @@ else:
                 st.write(f"Route: {airport_mapping[origin_code]} to {airport_mapping[dest_code]}")
                 st.write(f"Date: {datetime(2024, month, day).strftime('%B %d')} ({['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][day_of_week-1]})")
                 st.write(f"Departure: {departure_hour_display}")
-                st.write(f"Flight Time: {flight_time_display}")
+                st.write(f"Flight Duration: {flight_time_display}")
                 st.write(f"Distance: {distance} miles")
                
                 st.write("Flight Settings:")
@@ -461,4 +461,5 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
+
 
