@@ -235,7 +235,7 @@ with col5:
 st.divider()
 
 
-st.header("Additional Flight Settings")
+st.header("Optional Flight Settings")
 
 
 col6, col7, col8 = st.columns(3)
@@ -461,3 +461,4 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
+
