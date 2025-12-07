@@ -460,4 +460,5 @@ st.divider()
 st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
-""") I want to change only text Flight Time to Flight Duration
+""")
+
