@@ -32,20 +32,20 @@ with st.sidebar:
 
 @st.cache_resource
 def load_model():
-    if os.path.exists('flight_delay3.pkl'):
+    if os.path.exists('flight_delay2.pkl'):
         try:
-            model = joblib.load('flight_delay3.pkl')
+            model = joblib.load('flight_delay2.pkl')
             return model
         except Exception as e1:
             try:
-                with open('flight_delay3.pkl', 'rb') as f:
+                with open('flight_delay2.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
             except Exception as e2:
                 st.error(f"Failed to load model: {str(e2)[:100]}")
                 return None
     else:
-        st.error("Model file 'flight_delay3.pkl' not found")
+        st.error("Model file 'flight_delay2.pkl' not found")
         return None
 
 
@@ -339,4 +339,5 @@ st.divider()
 st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
+
 """)
