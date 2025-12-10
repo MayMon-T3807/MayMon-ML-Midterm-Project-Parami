@@ -13,11 +13,14 @@ st.set_page_config(
     layout="wide"
 )
 
+
 st.title("Flight Delay Predictor")
 st.markdown("Predict if your flight will be delayed by more than 15 minutes")
 
+
 with st.sidebar:
     st.header("Student Information")
+   
     st.info("""
     Student ID: PIUS20230024
     Student Name: May Mon Thant
@@ -26,25 +29,29 @@ with st.sidebar:
     Instructor: Prof. Nwe Nwe Htay Win
     """)
 
+
 @st.cache_resource
 def load_model():
     if os.path.exists('flight_delay.pkl'):
         try:
             model = joblib.load('flight_delay.pkl')
             return model
-        except:
+        except Exception as e1:
             try:
                 with open('flight_delay.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
-            except Exception as e:
-                st.error(f"Failed to load model: {str(e)[:100]}")
+            except Exception as e2:
+                st.error(f"Failed to load model: {str(e2)[:100]}")
                 return None
     else:
         st.error("Model file 'flight_delay.pkl' not found")
         return None
 
+
 model = load_model()
+
+
 
 airline_mapping = {
     'UA': 'United Air Lines Inc. (UA)',
@@ -63,10 +70,11 @@ airline_mapping = {
     'VX': 'Virgin America (VX)'
 }
 
+
 airport_mapping = {
     'ATL': 'Atlanta Hartsfield-Jackson (ATL)',
     'LAX': 'Los Angeles International (LAX)',
-    'ORD': "Chicago O'Hare International (ORD)",
+    'ORD': 'Chicago O\'Hare International (ORD)',
     'DFW': 'Dallas/Fort Worth International (DFW)',
     'DEN': 'Denver International (DEN)',
     'JFK': 'New York JFK International (JFK)',
@@ -134,12 +142,16 @@ airport_mapping = {
     'TYS': 'Knoxville McGhee Tyson (TYS)',
 }
 
+
 unique_airlines = list(airline_mapping.keys())
 unique_airports = list(airport_mapping.keys())
 
+
 st.header("Flight Details")
 
+
 col1, col2, col3 = st.columns(3)
+
 
 with col1:
     st.subheader("Origin")
@@ -150,6 +162,7 @@ with col1:
         key="origin"
     )
 
+
 with col2:
     st.subheader("Destination")
     dest_code = st.selectbox(
@@ -158,6 +171,7 @@ with col2:
         format_func=lambda x: airport_mapping[x],
         key="dest"
     )
+
 
 with col3:
     st.subheader("Airline")
@@ -168,14 +182,15 @@ with col3:
         key="airline"
     )
 
+
 st.divider()
 
-# -------------------------------
-# Flight Schedule
-# -------------------------------
+
 st.header("Flight Schedule")
 
+
 col4, col5 = st.columns(2)
+
 
 with col4:
     month = st.selectbox(
@@ -193,6 +208,7 @@ with col4:
         key="dow"
     )
 
+
 with col5:
     departure_hours = [f"{hour:02d}:00" for hour in range(0, 24)]
     departure_hour_display = st.selectbox(
@@ -202,9 +218,9 @@ with col5:
         key="hour_display"
     )
     scheduled_departure = int(departure_hour_display.split(":")[0])  
-
+    
     distance = st.slider("Distance (miles)", 50, 3000, 500, 50, key="distance")
-
+    
     flight_times = list(range(30, 601, 15))  
     flight_time_options = [f"{time // 60}h {time % 60}min" if time >= 60 else f"{time}min" for time in flight_times]
     flight_time_display = st.selectbox(
@@ -215,14 +231,15 @@ with col5:
     )
     scheduled_time = flight_times[flight_time_options.index(flight_time_display)]
 
+
 st.divider()
 
-# -------------------------------
-# Optional Settings
-# -------------------------------
+
 st.header("Optional Flight Settings")
 
+
 col6, col7, col8 = st.columns(3)
+
 
 with col6:
     rush_hour_options = ["Normal", "Morning Rush (6-8 AM)", "Evening Rush (5-7 PM)"]
@@ -231,13 +248,14 @@ with col6:
         options=rush_hour_options,
         index=0
     )
-
+   
     weekend_override = st.radio(
         "Weekend",
         options=["No", "Yes"],
         index=0,
         horizontal=True
     )
+
 
 with col7:
     season_options = ["Winter", "Spring", "Summer", "Fall", "Holiday Season (Nov-Dec)"]
@@ -246,7 +264,7 @@ with col7:
         options=season_options,
         index=2
     )
-
+   
     night_flight_override = st.radio(
         "Night Flight (10 PM - 5 AM)",
         options=["No", "Yes"],
@@ -254,7 +272,9 @@ with col7:
         horizontal=True
     )
 
+
 with col8:
+    
     st.write("**Flight Summary:**")
     st.write(f"Distance: {distance} miles")
 
@@ -264,42 +284,45 @@ with col8:
         flight_type = "Medium (500-2000 miles)"
     else:
         flight_type = "Long (>2000 miles)"
-
+    
     st.write(f"Flight Type: {flight_type}")
 
-# -------------------------------
-# Feature Engineering
-# -------------------------------
+
 hour_of_day = scheduled_departure
+
 
 is_morning_rush = 1 if rush_hour_selection == "Morning Rush (6-8 AM)" else 0
 is_evening_rush = 1 if rush_hour_selection == "Evening Rush (5-7 PM)" else 0
-
 if rush_hour_selection == "Normal":
     is_morning_rush = 1 if hour_of_day in [6, 7, 8] else 0
     is_evening_rush = 1 if hour_of_day in [17, 18, 19] else 0
+
 
 is_night_flight = 1 if night_flight_override == "Yes" else 0
 if night_flight_override == "No":
     is_night_flight = 1 if hour_of_day in [22, 23, 0, 1, 2, 3, 4, 5] else 0
 
+
 is_weekend = 1 if weekend_override == "Yes" else 0
 if weekend_override == "No":
     is_weekend = 1 if day_of_week in [6, 7] else 0
+
 
 winter_month = 1 if season_selection == "Winter" else 0
 summer_month = 1 if season_selection == "Summer" else 0
 holiday_season = 1 if season_selection == "Holiday Season (Nov-Dec)" else 0
 
+
 if season_selection not in ["Winter", "Summer", "Holiday Season (Nov-Dec)"]:
     winter_month = 1 if month in [12, 1, 2] else 0
     summer_month = 1 if month in [6, 7, 8] else 0
     holiday_season = 1 if month in [11, 12] else 0
-
 is_short_flight = 1 if distance < 500 else 0
 is_long_flight = 1 if distance > 2000 else 0
 
+
 scheduled_arrival_hhmm = (scheduled_departure * 100 + scheduled_time) % 2400
+
 
 input_data = pd.DataFrame([{
     'ORIGIN_AIRPORT': origin_code,
@@ -324,52 +347,70 @@ input_data = pd.DataFrame([{
     'is_long_flight': is_long_flight
 }])
 
+
 with st.expander("View Input Data"):
     st.write("This is what will be sent to the model:")
     st.dataframe(input_data)
 
+
 st.divider()
 st.header("Prediction")
 
+
 if model is None:
-    st.error("Model not loaded. Please upload the correct 'flight_delay.pkl' model file.")
+    st.warning("Model not loaded. Running in demo mode.")
+   
+    if st.button("Demo Prediction", type="primary", use_container_width=True):
+        demo_delay_prob = np.random.uniform(0.2, 0.8)
+        if demo_delay_prob > 0.5:
+            st.error(f"Likely DELAYED ({demo_delay_prob:.1%} probability)")
+        else:
+            st.success(f"Likely ON TIME ({1-demo_delay_prob:.1%} probability)")
+       
+        st.info("Upload 'flight_delay.pkl' for real predictions.")
 else:
     if st.button("Predict Delay", type="primary", use_container_width=True):
         try:
             prediction = model.predict(input_data)
-            probabilities = model.predict_proba(input_data)
-            delay_prob = probabilities[0][1] * 100
-            on_time_prob = probabilities[0][0] * 100
-
+           
+            try:
+                probabilities = model.predict_proba(input_data)
+                delay_prob = probabilities[0][1] * 100
+                on_time_prob = probabilities[0][0] * 100
+            except:
+                delay_prob = 100 if prediction[0] == 1 else 0
+                on_time_prob = 100 if prediction[0] == 0 else 0
+           
             st.subheader("Prediction Results")
-
+           
             col_result1, col_result2 = st.columns(2)
-
+           
             with col_result1:
                 st.metric("Delay Probability", f"{delay_prob:.1f}%")
                 st.progress(delay_prob / 100)
-
+           
             with col_result2:
                 if prediction[0] == 1:
                     st.error("FLIGHT LIKELY TO BE DELAYED")
                 else:
                     st.success("FLIGHT LIKELY TO BE ON TIME")
-
+           
             with st.expander("View Flight Details"):
                 st.write(f"Airline: {airline_mapping[airline_code]}")
-                st.write(f"Route: {airport_mapping[origin_code]} → {airport_mapping[dest_code]}")
+                st.write(f"Route: {airport_mapping[origin_code]} to {airport_mapping[dest_code]}")
                 st.write(f"Date: {datetime(2024, month, day).strftime('%B %d')} ({['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][day_of_week-1]})")
                 st.write(f"Departure: {departure_hour_display}")
                 st.write(f"Flight Time: {flight_time_display}")
                 st.write(f"Distance: {distance} miles")
-
+               
                 st.write("Flight Settings:")
                 st.write(f"- Rush Hour: {'Morning' if is_morning_rush else 'Evening' if is_evening_rush else 'Normal'}")
                 st.write(f"- Weekend: {'Yes' if is_weekend else 'No'}")
                 st.write(f"- Season: {'Winter' if winter_month else 'Summer' if summer_month else 'Holiday' if holiday_season else 'Regular'}")
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
                 st.write(f"- Flight Type: {flight_type}")
-
+               
+                # Risk Factors section remains
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
                     risk_factors.append("Rush hour flight")
@@ -383,25 +424,40 @@ else:
                     risk_factors.append("Short flight (<500 miles)")
                 if is_long_flight:
                     risk_factors.append("Long flight (>2000 miles)")
-
+               
                 if risk_factors:
                     st.write("Risk Factors:")
                     for factor in risk_factors:
                         st.write(f"• {factor}")
                 else:
                     st.write("Risk Factors: None")
-
+           
             st.subheader("Recommendations")
             if prediction[0] == 1:
-                st.warning("Book an earlier flight if possible.")
+                st.warning("""
+                Book an earlier flight if possible
+                """)
             else:
-                st.info("No sign of delay. Have a safe trip!")
-
+                st.info("""
+                No sign of delay and Have a safe trip!
+                """)
+               
         except Exception as e:
             st.error(f"Prediction error: {str(e)}")
+           
+            with st.expander("Debug Information"):
+                st.write("Error type:", type(e).__name__)
+                st.write("Model type:", type(model))
+               
+                if hasattr(model, 'steps'):
+                    st.write("Pipeline steps:", [step[0] for step in model.steps])
+               
+                st.write("Input columns:", list(input_data.columns))
+                st.write("Input data shape:", input_data.shape)
+
 
 st.divider()
 st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
-""")
+""")  
