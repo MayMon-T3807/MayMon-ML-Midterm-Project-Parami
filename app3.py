@@ -410,7 +410,7 @@ else:
                 st.write(f"- Night Flight: {'Yes' if is_night_flight else 'No'}")
                 st.write(f"- Flight Type: {flight_type}")
                
-                # Risk Factors section remains
+                
                 risk_factors = []
                 if is_morning_rush or is_evening_rush:
                     risk_factors.append("Rush hour flight")
@@ -461,4 +461,5 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
+
 
