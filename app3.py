@@ -15,7 +15,7 @@ st.set_page_config(
 st.title("Flight Delay Predictor")
 st.markdown("Predict if your flight will be delayed by more than 15 minutes")
 
-with st.sidebar:
+with st.sidebar.markdown:
     st.header("Student Information")
     st.info("""
     Student ID: PIUS20230024
@@ -309,3 +309,4 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
+
