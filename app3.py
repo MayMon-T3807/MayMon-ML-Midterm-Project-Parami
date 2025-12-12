@@ -6,6 +6,10 @@ import pickle
 import os
 from datetime import datetime
 
+st.sidebar.write("Debug Info:")
+st.sidebar.write(f"sklearn: {sklearn.__version__}")
+st.sidebar.write(f"imblearn: {imblearn.__version__}")
+
 st.set_page_config(
     page_title="Flight Delay Predictor",
     page_icon="✈️",
@@ -310,3 +314,4 @@ Note: Predictions are based on historical data. Actual delays may vary due to we
 air traffic control, or operational factors. Always check with your airline for official flight status.
 
 """)
+
