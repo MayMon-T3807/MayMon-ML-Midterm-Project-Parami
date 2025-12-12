@@ -33,7 +33,7 @@ def load_model():
             return model
         except Exception as e1:
             try:
-                with open('_model.pkl', 'rb') as f:
+                with open('model.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
             except Exception as e2:
