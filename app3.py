@@ -5,8 +5,6 @@ import joblib
 import pickle
 import os
 from datetime import datetime
-import sklearn
-import imblearn
 
 st.set_page_config(
     page_title="Flight Delay Predictor",
@@ -35,7 +33,7 @@ def load_model():
             return model
         except Exception as e1:
             try:
-                with open('model.pkl', 'rb') as f:
+                with open('_model.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
             except Exception as e2:
@@ -310,8 +308,4 @@ st.divider()
 st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
-
 """)
-
-
-
