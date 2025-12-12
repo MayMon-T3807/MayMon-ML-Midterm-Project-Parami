@@ -5,6 +5,8 @@ import joblib
 import pickle
 import os
 from datetime import datetime
+import sklearn
+import imblearn
 
 st.sidebar.write("Debug Info:")
 st.sidebar.write(f"sklearn: {sklearn.__version__}")
@@ -314,4 +316,5 @@ Note: Predictions are based on historical data. Actual delays may vary due to we
 air traffic control, or operational factors. Always check with your airline for official flight status.
 
 """)
+
 
