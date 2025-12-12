@@ -27,13 +27,13 @@ with st.sidebar:
 
 @st.cache_resource
 def load_model():
-    if os.path.exists('flight_model.pkl'):
+    if os.path.exists('model.pkl'):
         try:
-            model = joblib.load('flight_model.pkl')
+            model = joblib.load('model.pkl')
             return model
         except Exception as e1:
             try:
-                with open('flight_model.pkl', 'rb') as f:
+                with open('model.pkl', 'rb') as f:
                     model = pickle.load(f)
                 return model
             except Exception as e2:
@@ -309,5 +309,3 @@ st.caption("""
 Note: Predictions are based on historical data. Actual delays may vary due to weather,
 air traffic control, or operational factors. Always check with your airline for official flight status.
 """)
-
-
